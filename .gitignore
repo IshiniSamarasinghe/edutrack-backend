@@ -1,0 +1,38 @@
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# Environment (keep example)
+.env
+.env.*
+!/.env.example
+
+# IDE / tooling
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+.phpunit.result.cache
+/.phpunit.cache
+.phpactor.json
+/auth.json
+
+# Dependencies & build artifacts
+/node_modules
+/vendor
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/bootstrap/cache/*.php
+
+# SQLite dev DB files
+/database/*.sqlite
+/database/*.sqlite-*
+
+# Homestead
+Homestead.json
+Homestead.yaml
