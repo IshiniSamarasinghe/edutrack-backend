@@ -18,18 +18,27 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global CORS (allow credentials from http://localhost:3000 etc.)
-        $middleware->use([HandleCors::class]);
+        /**
+         * Global middleware
+         * - CORS must be global so preflight + credentials work
+         */
+        $middleware->use([
+            HandleCors::class,
+        ]);
 
-        // ✅ Make Sanctum treat API requests as stateful (session-based)
+        /**
+         * API group middleware
+         * - Treat API requests as "stateful" (SPA auth via session cookies)
+         * - Start the session so Sanctum can read/write the session
+         * - Share session errors (harmless for API, useful for debugging)
+         * - DO NOT add VerifyCsrfToken to API; your frontend will send XSRF header
+         */
         $middleware->appendToGroup('api', [
             EnsureFrontendRequestsAreStateful::class,
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
             StartSession::class,
             ShareErrorsFromSession::class,
-            // Do NOT add VerifyCsrfToken for API; not needed for GETs and
-            // you'll send XSRF header on mutating requests via axios.
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
