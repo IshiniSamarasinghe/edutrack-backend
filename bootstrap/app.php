@@ -4,6 +4,11 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\HandleCors;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -13,14 +18,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Global CORS (required for cookies from localhost:3000)
-        $middleware->use([ HandleCors::class ]);
+        // Global CORS (allow credentials from http://localhost:3000 etc.)
+        $middleware->use([HandleCors::class]);
 
-        // If Sanctum is present, allow stateful SPA requests on the API group too
-        if (class_exists(\Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class)) {
-            $middleware->appendToGroup('api', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
-        }
-        // No need to append EncryptCookies — it's already in the default "web" stack.
+        // ✅ Make Sanctum treat API requests as stateful (session-based)
+        $middleware->appendToGroup('api', [
+            EnsureFrontendRequestsAreStateful::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            // Do NOT add VerifyCsrfToken for API; not needed for GETs and
+            // you'll send XSRF header on mutating requests via axios.
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
