@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CourseCatalogController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ResultController;
 use App\Http\Controllers\Api\MeController;
+use App\Http\Controllers\Api\AchievementController;
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -24,5 +25,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return response()->json(['user' => $request->user()]);
 });
+
+Route::get('/achievements',  [AchievementController::class, 'index']);
+Route::post('/achievements', [AchievementController::class, 'store']);
+Route::delete('/achievements/{achievement}', [AchievementController::class, 'destroy']);
+
+Route::get('/courses/{offering}/content', [CourseContentController::class, 'show']);
 
 });
