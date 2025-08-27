@@ -75,4 +75,12 @@ class EnrollmentController extends Controller
 
         return response()->json(['items' => $items]);
     }
+public function destroy(Request $request, Enrollment $enrollment)
+    {
+        // only allow the owner to delete their enrollment
+        abort_if($enrollment->user_id !== $request->user()->id, 403, 'Forbidden');
+
+        $enrollment->delete();
+        return response()->noContent(); // 204
+    }
 }
