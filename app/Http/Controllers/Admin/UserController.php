@@ -12,16 +12,18 @@ class UserController extends Controller
     {
         $q       = trim($request->query('q', ''));
         $perPage = min(100, max(5, (int) $request->query('per_page', 10)));
-        $sort    = $request->query('sort', 'created_at'); // id|name|email|email_verified_at|created_at|updated_at
+        $sort    = $request->query('sort', 'created_at'); // id|name|email|email_verified_at|created_at|updated_at|achievements_count
         $dir     = $request->query('dir', 'desc');        // asc|desc
 
         $users = User::query()
+            ->withCount('achievements') // NEW: exposes achievements_count
             ->when($q !== '', function ($qr) use ($q) {
                 $qr->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")
                         ->orWhere('email', 'like', "%{$q}%");
                 });
             })
+            // Tip: sorting by achievements_count now works too
             ->orderBy($sort, $dir)
             ->paginate($perPage);
 
@@ -39,6 +41,7 @@ class UserController extends Controller
             'remember_token'    => $user->remember_token,
             'created_at'        => $user->created_at,
             'updated_at'        => $user->updated_at,
+            'achievements_count'=> $user->achievements()->count(), // NEW: include count in show()
         ]);
     }
 

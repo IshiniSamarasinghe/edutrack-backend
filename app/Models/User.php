@@ -20,8 +20,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'index_number',   // your student id field
-        'avatar_path',    // path under storage/app/public/...
+        'index_number',   // student id
+        'avatar_path',    // storage path (public disk)
         'type',
         'pathway',
     ];
@@ -60,21 +60,38 @@ class User extends Authenticatable
             return null; // or return asset('images/avatar-placeholder.png');
         }
 
-        // If an absolute URL was stored (less common), just return it.
+        // If an absolute URL was stored, return as-is.
         if (preg_match('#^https?://#i', $this->avatar_path)) {
             return $this->avatar_path;
         }
 
-        // Normal case: a path like "avatars/abc.jpg" on the "public" disk.
+        // Normal case: path like "avatars/abc.jpg" on the "public" disk.
         return Storage::disk('public')->url($this->avatar_path);
         // Equivalent: return asset('storage/'.$this->avatar_path);
     }
 
     /**
-     * Relationships.
+     * Relationships
      */
     public function results(): HasMany
     {
         return $this->hasMany(\App\Models\Result::class);
+    }
+
+    /** =========================
+     *  Achievements (NEW)
+     *  ========================= */
+    public function achievements(): HasMany
+    {
+        return $this->hasMany(\App\Models\Achievement::class);
+    }
+
+    /**
+     * Optional helper: include achievements_count in queries.
+     * Usage: User::withAchievementsCount()->paginate(...)
+     */
+    public function scopeWithAchievementsCount($query)
+    {
+        return $query->withCount('achievements');
     }
 }
