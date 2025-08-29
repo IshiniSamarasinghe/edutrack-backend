@@ -2,34 +2,22 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Api\CourseCatalogController;
-use App\Http\Controllers\Api\EnrollmentController;
-use App\Http\Controllers\Api\ResultController;
-use App\Http\Controllers\Api\MeController;
-use App\Http\Controllers\Api\AchievementController;
 
+/*
+|--------------------------------------------------------------------------
+| API Routes (stateless)
+|--------------------------------------------------------------------------
+| Keep only truly stateless/public APIs here.
+| All cookie/session SPA routes (students + admin) are defined in web.php.
+| This avoids duplicate paths and 401s from the api middleware.
+|--------------------------------------------------------------------------
+*/
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/courses', [CourseCatalogController::class, 'index']);
-    Route::post('/enrollments', [EnrollmentController::class, 'store']);
-    Route::get('/my-courses', [EnrollmentController::class, 'index']);
-    Route::get('/results', [ResultController::class, 'index']);
-
-    Route::get('/me', function (Request $request) {
-        // returns: id, name, email, index_number, avatar_url
-        return $request->user()->only(['id','name','email','index_number','avatar_url']);
-    });
-
-    Route::post('/me/avatar', [MeController::class, 'uploadAvatar']);
-
-    Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
-    return response()->json(['user' => $request->user()]);
+// Example health endpoint (optional)
+Route::get('/health', function () {
+    return response()->json(['ok' => true, 'ts' => now()->toISOString()]);
 });
 
-Route::get('/achievements',  [AchievementController::class, 'index']);
-Route::post('/achievements', [AchievementController::class, 'store']);
-Route::delete('/achievements/{achievement}', [AchievementController::class, 'destroy']);
-
-Route::get('/courses/{offering}/content', [CourseContentController::class, 'show']);
-
-});
+// If you need token-based APIs in the future, put them here with auth:sanctum
+// BUT do not duplicate any of the SPA endpoints that live in web.php.
+// Route::middleware('auth:sanctum')->get('/v1/something', ...);

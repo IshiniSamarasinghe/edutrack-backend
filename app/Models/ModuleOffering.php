@@ -8,21 +8,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModuleOffering extends Model
 {
-    protected $fillable = [
-        'module_id',
-        'type',
-        'pathway',
-        'year',
-        'semester',
-    ];
+    // if your table name is the default "module_offerings", no need to set $table
+    protected $fillable = ['module_id', 'type', 'pathway', 'year', 'semester'];
 
     public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);
     }
 
-    public function results(): HasMany
+    // IMPORTANT: this is what withCount('enrollments') uses
+    public function enrollments(): HasMany
     {
-        return $this->hasMany(Result::class, 'module_offering_id');
+        // column on enrollments table that points to this offering is "module_offering_id"
+        return $this->hasMany(Enrollment::class, 'module_offering_id');
     }
 }
